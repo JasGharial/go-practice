@@ -71,3 +71,28 @@ func UpdateTodo(id int, title string, completed bool) (Todo, error) {
 
 	return Todo{}, fmt.Errorf("todo with ID %d not found", id)
 }
+
+// DeleteTodo omits a todo with the id passed in the argument thus deleting a todo. It returns the deleted Todo item and an error if the todo with the given ID is not found.
+func DeleteTodo(id int) (Todo, error) {
+	todos := GetAllTodos()
+
+	for i, todo := range todos {
+		if todo.ID == id {
+			// Store the todo before removing it.
+			deletedTodo := todo
+
+			// Remove the todo at index i.
+			todos = append(todos[:i], todos[i+1:]...)
+
+			// Persist the updated slice.
+			jsonData := map[string]interface{}{
+				"todos": todos,
+			}
+			WriteJSON(jsonData)
+
+			return deletedTodo, nil
+		}
+	}
+
+	return Todo{}, fmt.Errorf("todo with ID %d not found", id)
+}

@@ -17,3 +17,15 @@ type CreateTodoRequest struct {
 	Title     string `json:"title"`
 	Completed *bool  `json:"completed"`
 }
+
+// UpdateTodoRequest represents the request payload for updating a todo item, including the title and an optional completion status.
+type UpdateTodoRequest struct {
+	ID        int    `json:"id"`
+	Title     string `json:"title"`
+	Completed *bool  `json:"completed"`
+}
+
+// DeleteTodoRequest represent the request payload for deleting a todo item.
+type DeleteTodoRequest struct {
+	ID int `json:"id"`
+}

@@ -20,6 +20,8 @@ func invokeServer() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /todos", GetTodosHandler)
 	mux.HandleFunc("POST /todos", CreateTodoHandler)
+	mux.HandleFunc("PUT /todos", UpdateTodoHandler)
+	mux.HandleFunc("DELETE /todos", DeleteTodoHandler)
 
 	log.Println("Starting server on :3000")
 	if err := http.ListenAndServe(":3000", SetHeader(LogRequest(mux))); err != nil {
@@ -38,10 +40,6 @@ func CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var createTodoRequest CreateTodoRequest
-	// if err := json.NewDecoder(r.Body).Decode(&createTodoRequest); err != nil {
-	// 	HandleErrorResponse(w, err, http.StatusBadRequest)
-	// 	return
-	// }
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields() // Disallow unknown fields in the JSON request body
 	if err := decoder.Decode(&createTodoRequest); err != nil {
@@ -58,6 +56,66 @@ func CreateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	responseBody := map[string]interface{}{
 		"message": "Todo created successfully",
 		"todo":    newTodo,
+	}
+
+	HandleResponse(w, responseBody)
+}
+
+func UpdateTodoHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var updateTodoRequest UpdateTodoRequest
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&updateTodoRequest); err != nil {
+		HandleErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if err := updateTodoRequest.Validate(); err != nil {
+		HandleErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	updatedTodo, err := UpdateTodo(updateTodoRequest.ID, updateTodoRequest.Title, *updateTodoRequest.Completed)
+	if err != nil {
+		HandleErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	responseBody := map[string]interface{}{
+		"message": "Todo updated successfully",
+		"todo":    updatedTodo,
+	}
+
+	HandleResponse(w, responseBody)
+}
+
+func DeleteTodoHandler(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
+	var deleteTodoRequest DeleteTodoRequest
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&deleteTodoRequest); err != nil {
+		HandleErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if err := deleteTodoRequest.Validate(); err != nil {
+		HandleErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	deletedTodo, err := DeleteTodo(deleteTodoRequest.ID)
+	if err != nil {
+		HandleErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	responseBody := map[string]interface{}{
+		"message": "Todo deleted successfully",
+		"todo":    deletedTodo,
 	}
 
 	HandleResponse(w, responseBody)

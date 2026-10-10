@@ -82,3 +82,26 @@ func (r CreateTodoRequest) Validate() error {
 	}
 	return nil
 }
+
+// Validate validates the UpdateTodoRequest struct to ensure that the id is positive integer and all the conditions are retained from the CreateTodoRequest request struct.
+func (r UpdateTodoRequest) Validate() error {
+	if r.ID <= 0 {
+		return fmt.Errorf("id must be a positive integer")
+	}
+	if strings.TrimSpace(r.Title) == "" {
+		return fmt.Errorf("title is required")
+	}
+	if len(r.Title) > 100 {
+		return fmt.Errorf("title must not exceed more than 100 characters")
+	}
+	return nil
+}
+
+// Validate validates the DeleteTodoRequest struct to ensure that the id is positive integer.
+func (r DeleteTodoRequest) Validate() error {
+    if r.ID <= 0 {
+        return fmt.Errorf("id must be a positive integer")
+    }
+
+    return nil
+}
